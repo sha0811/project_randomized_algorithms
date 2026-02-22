@@ -8,8 +8,11 @@ from algorithms import (
     run_balance_aggressive,
     run_balance_exponential,
     run_double_coverage,
+    run_wfa,
+    run_adaptive_clustering,
     run_random_among_nearest,
     run_balance_random,
+    run_harmonic,
 )
 
 
@@ -64,10 +67,15 @@ if __name__ == "__main__":
     test_algo_all_instances(run_balance_aggressive, algo_name="balance_aggressive", alpha=0.01)
     test_algo_all_instances(run_balance_exponential, algo_name="balance_exponential", alpha=0.5, beta=0.01)
     test_algo_all_instances(run_double_coverage, algo_name="double_coverage")
+    test_algo_all_instances(run_wfa, algo_name="wfa")
+    test_algo_all_instances(run_adaptive_clustering, algo_name="adaptive_clustering", window=20, reassign_every=10)
     # Randomized algorithms
     test_randomized_algo_all_instances(
         run_random_among_nearest, algo_name="random_among_nearest", m=2
     )
     test_randomized_algo_all_instances(
         run_balance_random, algo_name="balance_random", alpha=0.5
+    )
+    test_randomized_algo_all_instances(
+        run_harmonic, algo_name="harmonic"
     )

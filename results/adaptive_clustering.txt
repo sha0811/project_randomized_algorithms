@@ -1,0 +1,22 @@
+instance_N200_OPT221.inst: cost=3957, opt=221, ratio=17.9050
+instance_N200_OPT286.inst: cost=8790, opt=286, ratio=30.7343
+instance_N200_OPT347.inst: cost=6207, opt=347, ratio=17.8876
+instance_N200_OPT5166.inst: cost=6887, opt=5166, ratio=1.3331
+instance_N200_OPT5266.inst: cost=6029, opt=5266, ratio=1.1449
+instance_N200_OPT5298.inst: cost=6745, opt=5298, ratio=1.2731
+instance_N250_OPT134.inst: cost=3922, opt=134, ratio=29.2687
+instance_N250_OPT4262.inst: cost=8354, opt=4262, ratio=1.9601
+instance_N300_OPT246.inst: cost=11447, opt=246, ratio=46.5325
+instance_N300_OPT337.inst: cost=13755, opt=337, ratio=40.8160
+instance_N300_OPT394.inst: cost=11988, opt=394, ratio=30.4264
+instance_N300_OPT5645.inst: cost=7433, opt=5645, ratio=1.3167
+instance_N300_OPT6260.inst: cost=14558, opt=6260, ratio=2.3256
+instance_N300_OPT7236.inst: cost=8484, opt=7236, ratio=1.1725
+instance_N350_OPT277.inst: cost=10754, opt=277, ratio=38.8231
+instance_N350_OPT5552.inst: cost=8559, opt=5552, ratio=1.5416
+instance_N400_OPT3683.inst: cost=8968, opt=3683, ratio=2.4350
+instance_N400_OPT3717.inst: cost=9276, opt=3717, ratio=2.4956
+instance_N400_OPT377.inst: cost=11977, opt=377, ratio=31.7692
+instance_N400_OPT398.inst: cost=23578, opt=398, ratio=59.2412
+
+mean_ratio: 18.0201  ci95: [9.7521, 26.2881]

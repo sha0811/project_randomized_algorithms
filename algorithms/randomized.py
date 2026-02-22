@@ -68,3 +68,61 @@ def choose_server_balance_random(servers, site_pos, state, alpha=0.5, epsilon=1e
     d = manhattan(servers[best_server], site_pos)
     state["total_dist"][best_server] += d
     return best_server
+
+
+# ── Harmonic Algorithm ────────────────────────────────────────────────────────
+
+
+def run_harmonic(path, **kwargs):
+    instance = load_instance(path)
+    clients = instance["sites"]
+    requests = instance["requests"]
+    k = instance["k"]
+    servers = [(0, 0)] * k
+    state = {}
+    cost = 0
+    for request in requests:
+        site_pos = clients[request]
+        server = choose_server_harmonic(servers, site_pos, state, **kwargs)
+        cost += manhattan(servers[server], site_pos)
+        servers[server] = site_pos
+    return (cost, instance["opt"])
+
+
+def choose_server_harmonic(servers, site_pos, state, **kwargs):
+    """
+    Harmonic Algorithm — randomized, theoretically O(log k)-competitive.
+
+    Each server j is selected with probability proportional to 1/d(s_j, r),
+    i.e. the inverse of its distance to the request.  Servers already at the
+    request site (distance 0) are chosen with certainty (they incur zero cost).
+
+    If all servers are equidistant, fall back to uniform random.
+
+    Reference: Raghavan & Snir, 1994 / Karloff et al.
+    """
+    if "rng" not in state:
+        state["rng"] = random.Random()
+    rng = state["rng"]
+    k = len(servers)
+
+    dists = [manhattan(servers[j], site_pos) for j in range(k)]
+
+    # If any server is already there, pick one of them uniformly (cost = 0)
+    zero_cost = [j for j, d in enumerate(dists) if d == 0]
+    if zero_cost:
+        return rng.choice(zero_cost)
+
+    # Weights = 1/d for each server
+    weights = [1.0 / d for d in dists]
+    total = sum(weights)
+
+    # Weighted random draw
+    r = rng.random() * total
+    cumulative = 0.0
+    for j, w in enumerate(weights):
+        cumulative += w
+        if r <= cumulative:
+            return j
+
+    return k - 1  # fallback (floating-point edge case)
