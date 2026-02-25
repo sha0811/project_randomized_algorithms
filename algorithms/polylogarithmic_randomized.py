@@ -1062,9 +1062,9 @@ class FractionalSolver:
 # integral configuration performs a corresponding server move with probability
 # proportional to that delta, preserving the invariant in expectation.
 #
-# Your implementation: what it does
+# This implementation: what it does
 # ---------------------------------
-# This code does NOT implement the full infinitesimal (δ→0) randomized swap
+# This code does NOT implement the full infinitesimal (δ tends to 0) randomized swap
 # process explicitly. Instead, it produces a practical online rounding heuristic
 # inspired by Theorem 24 / Lemma 25:
 #
@@ -1176,9 +1176,9 @@ class FractionalSolver:
 # Summary of behavior on new requests
 # ----------------------------------
 # When a new request arrives:
-#   - If a server is already there → no move.
+#   - If a server is already there => no move.
 #   - Else:
-#       1) if any server is unused (None) → deploy it to the request.
+#       1) if any server is unused (None) => deploy it to the request.
 #       2) otherwise:
 #          pick a server that is tree-close to the request, with a surplus-based
 #          tie-break using fractional masses in the LCA subtree.

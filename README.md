@@ -17,14 +17,15 @@ The **competitive ratio** of an online algorithm is (algorithm cost) / (offline 
 ```
 Projet/
 ├── README.md
-├── utilities.py          # Instance loading, Manhattan distance, paths (instances, results)
-├── eval.py               # Entry point: run all algorithms on all instances
+├── utilities.py                            # Instance loading, Manhattan distance, paths (instances, results)
+├── eval.py                                 # Entry point: run all algorithms on all instances
 ├── algorithms/
-│   ├── __init__.py       # Exports (run_* and choose_server_*)
-│   ├── deterministic.py  # Deterministic algorithms (greedy, balance, double coverage, etc.)
-│   └── randomized.py     # Randomized algorithms (random among nearest, balance random)
-├── k-server_instances/   # .inst files (one instance per file)
-└── results/              # .txt result files (one per algorithm)
+│   ├── __init__.py                         # Exports (run_* and choose_server_*)
+│   ├── deterministic.py                    # Deterministic algorithms (greedy, balance, double coverage, etc.)
+│   ├── polylogarithmic_randomized.py       # Very big file, polylogarithmic online randomized algorithm
+|   └── randomized.py                       # Randomized algorithms (random among nearest, balance random)
+├── k-server_instances/                     # .inst files (one instance per file)
+└── results/                                # .txt result files (one per algorithm)
 ```
 
 - Each algorithm exposes a **`run_*(path, **kwargs)`** function that takes an instance path and returns **`(cost, opt)`**. The evaluator only uses this interface.
@@ -59,17 +60,25 @@ Sites are numbered in order of appearance (starting from 0).
 
 ## Implemented algorithms
 
-| Algorithm           | Type        | Short description |
-|--------------------|-------------|-------------------|
-| Greedy             | Deterministic | Nearest server |
-| Balance            | Deterministic | Minimise distance + α × (distance already travelled by server) |
-| Balance time decay | Deterministic | Balance with time-decaying α (decay=0.9988) |
-| Balance reuse zero  | Deterministic | Like balance time decay but when a server is already at the request, prefer the one that last served this site (best mean ratio) |
-| Balance aggressive | Deterministic | Balance with quadratic penalty on load |
-| Balance exponential| Deterministic | Balance with exponential penalty on load |
-| Double Coverage    | Deterministic | Two nearest servers move toward the request until one reaches it |
-| Random among nearest | Randomized | Pick uniformly at random among the m nearest servers |
-| Balance random     | Randomized | Balance with random tie-breaking when scores are equal |
+| Algorithm                     | Type           | Short description |
+|------------------------------|---------------|-------------------|
+| Greedy                       | Deterministic | Always assign the nearest server |
+| Balance                      | Deterministic | Minimise distance + α × (distance already travelled by server) |
+| Balance aggressive           | Deterministic | Balance with very small α (strong load sensitivity) |
+| Balance exponential          | Deterministic | Balance with exponential penalty on load (α, β parameters) |
+| Balance sqrt                 | Deterministic | Balance with square-root load penalty |
+| Balance time decay           | Deterministic | Balance with time-decaying α |
+| Balance time decay inverse   | Deterministic | Balance with inverse time-based α schedule |
+| Balance reuse zero           | Deterministic | Balance with time decay; prefers reusing a server already at the request |
+| Site affinity                | Deterministic | Bias toward servers that historically served a site (affinity threshold) |
+| Double Coverage              | Deterministic | Two nearest servers move toward the request until one reaches it |
+| WFA                          | Deterministic | Work Function Algorithm |
+| Adaptive clustering          | Deterministic | Periodically reassign servers using clustering over a sliding window |
+| Random among nearest         | Randomized    | Pick uniformly at random among the m nearest servers |
+| Balance random               | Randomized    | Balance with random tie-breaking |
+| Harmonic                     | Randomized    | Probabilistic selection weighted by inverse distance |
+| Softmin balance              | Randomized    | Balance with softmin (temperature-controlled probabilistic selection) |
+| BBMN                         | Randomized    | Fractional algorithm based on HST embedding (eps, deta parameters) |
 
 Parameters (α, β, m, etc.) are set in the calls to `test_algo_all_instances` / `test_randomized_algo_all_instances` in `eval.py`.
 

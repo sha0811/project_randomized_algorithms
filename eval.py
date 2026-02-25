@@ -51,8 +51,8 @@ def test_randomized_algo_all_instances(algorithm, algo_name, n_runs=10_000, **al
     with open(results_path, "w") as out:
         i = 0
         for file_path in sorted(instances_dir.glob("*.inst")):
-            # if i == 4: 
-            #     break
+            if i == 1: 
+                break
             i += 1
             ratios = []
             for _ in tqdm(range(n_runs), desc=file_path.name, unit="run"):
@@ -89,6 +89,7 @@ ALGORITHMS = {
     "balance_random": (run_balance_random, False, {"alpha": 0.5}),
     "harmonic": (run_harmonic, False, {}),
     "softmin_balance": (run_softmin_balance, False, {"alpha": 0.5, "temperature": 10.0}),
+    "bbmn": (run_bbmn_fractional, False, {"n_runs": 50, "eps": 0.05, "deta": 0.05}),
 }
 
 
@@ -106,33 +107,33 @@ if __name__ == "__main__":
     # test_randomized_algo_all_instances(
     #     run_balance_random, algo_name="balance_random", alpha=0.5
     # )
-    test_randomized_algo_all_instances(
-        run_bbmn_fractional,
-        algo_name="bbmn",          # results/bbmn.txt
-        n_runs=50,             # same as the other randomized algos
-        # hst_seed is intentionally omitted so each run gets a fresh random HST
-        eps=0.05, deta=0.05
-    )
+    # test_randomized_algo_all_instances(
+    #     run_bbmn_fractional,
+    #     algo_name="bbmn",          # results/bbmn.txt
+    #     n_runs=50,             # same as the other randomized algos
+    #     # hst_seed is intentionally omitted so each run gets a fresh random HST
+    #     eps=0.05, deta=0.05
+    # )
 # =======
-#     if len(sys.argv) > 1:
-#         # case where we want to run a specific algorithm
-#         for name in sys.argv[1:]:
-#             name = name.strip().lower()
-#             if name not in ALGORITHMS:
-#                 print(f"Unknown algorithm: {name}. Available: {', '.join(sorted(ALGORITHMS))}")
-#                 sys.exit(1)
-#             algo, deterministic, kwargs = ALGORITHMS[name]
-#             if deterministic:
-#                 test_algo_all_instances(algo, algo_name=name, **kwargs)
-#             else:
-#                 test_randomized_algo_all_instances(algo, algo_name=name, **kwargs)
-#             print(f"Done: {name} -> results/{name}.txt")
-#     else:
-#         # Run all algorithms
-#         for name, (algo, deterministic, kwargs) in ALGORITHMS.items():
-#             if deterministic:
-#                 test_algo_all_instances(algo, algo_name=name, **kwargs)
-#             else:
-#                 test_randomized_algo_all_instances(algo, algo_name=name, **kwargs)
-#             print(f"Done: {name}")
+    if len(sys.argv) > 1:
+        # case where we want to run a specific algorithm
+        for name in sys.argv[1:]:
+            name = name.strip().lower()
+            if name not in ALGORITHMS:
+                print(f"Unknown algorithm: {name}. Available: {', '.join(sorted(ALGORITHMS))}")
+                sys.exit(1)
+            algo, deterministic, kwargs = ALGORITHMS[name]
+            if deterministic:
+                test_algo_all_instances(algo, algo_name=name, **kwargs)
+            else:
+                test_randomized_algo_all_instances(algo, algo_name=name, **kwargs)
+            print(f"Done: {name} -> results/{name}.txt")
+    else:
+        # Run all algorithms
+        for name, (algo, deterministic, kwargs) in ALGORITHMS.items():
+            if deterministic:
+                test_algo_all_instances(algo, algo_name=name, **kwargs)
+            else:
+                test_randomized_algo_all_instances(algo, algo_name=name, **kwargs)
+            print(f"Done: {name}")
 # >>>>>>> 976cd1b763d5fac28d31d963761055692d0a8395
