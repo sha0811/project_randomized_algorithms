@@ -17,6 +17,10 @@ from .randomized import (
     run_balance_random,
 )
 
+from .polylogarithmic_randomized import (
+    run_bbmn_fractional,
+)
+
 __all__ = [
     "run_greedy",
     "run_balance",
@@ -25,4 +29,5 @@ __all__ = [
     "run_double_coverage",
     "run_random_among_nearest",
     "run_balance_random",
+    "bbmn",
 ]

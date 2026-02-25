@@ -10,6 +10,7 @@ from algorithms import (
     run_double_coverage,
     run_random_among_nearest,
     run_balance_random,
+    run_bbmn_fractional,
 )
 
 
@@ -39,7 +40,11 @@ def test_randomized_algo_all_instances(algorithm, algo_name, n_runs=10_000, **al
     results_path = results_dir / f"{algo_name}.txt"
     all_mean_ratios = []
     with open(results_path, "w") as out:
+        i = 0
         for file_path in sorted(instances_dir.glob("*.inst")):
+            # if i == 4: 
+            #     break
+            i += 1
             ratios = []
             for _ in tqdm(range(n_runs), desc=file_path.name, unit="run"):
                 cost, opt = algorithm(file_path, **algo_kw)
@@ -59,15 +64,22 @@ def test_randomized_algo_all_instances(algorithm, algo_name, n_runs=10_000, **al
 
 if __name__ == "__main__":
     # Deterministic algorithms
-    test_algo_all_instances(run_greedy, algo_name="greedy")
-    test_algo_all_instances(run_balance, algo_name="balance", alpha=0.5)
-    test_algo_all_instances(run_balance_aggressive, algo_name="balance_aggressive", alpha=0.01)
-    test_algo_all_instances(run_balance_exponential, algo_name="balance_exponential", alpha=0.5, beta=0.01)
-    test_algo_all_instances(run_double_coverage, algo_name="double_coverage")
-    # Randomized algorithms
+    # test_algo_all_instances(run_greedy, algo_name="greedy")
+    # test_algo_all_instances(run_balance, algo_name="balance", alpha=0.5)
+    # test_algo_all_instances(run_balance_aggressive, algo_name="balance_aggressive", alpha=0.01)
+    # test_algo_all_instances(run_balance_exponential, algo_name="balance_exponential", alpha=0.5, beta=0.01)
+    # test_algo_all_instances(run_double_coverage, algo_name="double_coverage")
+    # # Randomized algorithms
+    # test_randomized_algo_all_instances(
+    #     run_random_among_nearest, algo_name="random_among_nearest", m=2
+    # )
+    # test_randomized_algo_all_instances(
+    #     run_balance_random, algo_name="balance_random", alpha=0.5
+    # )
     test_randomized_algo_all_instances(
-        run_random_among_nearest, algo_name="random_among_nearest", m=2
-    )
-    test_randomized_algo_all_instances(
-        run_balance_random, algo_name="balance_random", alpha=0.5
+        run_bbmn_fractional,
+        algo_name="bbmn",          # results/bbmn.txt
+        n_runs=50,             # same as the other randomized algos
+        # hst_seed is intentionally omitted so each run gets a fresh random HST
+        eps=0.05, deta=0.05
     )
