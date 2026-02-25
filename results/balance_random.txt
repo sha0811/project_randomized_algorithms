@@ -1,3 +1,22 @@
 instance_N200_OPT221.inst: mean_ratio=1.0000 ci95=[1.0000, 1.0000]
+instance_N200_OPT286.inst: mean_ratio=1.3916 ci95=[1.3916, 1.3916]
+instance_N200_OPT347.inst: mean_ratio=1.0288 ci95=[1.0288, 1.0288]
+instance_N200_OPT5166.inst: mean_ratio=1.2571 ci95=[1.2571, 1.2571]
+instance_N200_OPT5266.inst: mean_ratio=1.3551 ci95=[1.3547, 1.3556]
+instance_N200_OPT5298.inst: mean_ratio=1.2242 ci95=[1.2240, 1.2244]
+instance_N250_OPT134.inst: mean_ratio=1.0000 ci95=[1.0000, 1.0000]
+instance_N250_OPT4262.inst: mean_ratio=1.2681 ci95=[1.2675, 1.2688]
+instance_N300_OPT246.inst: mean_ratio=1.0976 ci95=[1.0976, 1.0976]
+instance_N300_OPT337.inst: mean_ratio=1.0000 ci95=[1.0000, 1.0000]
+instance_N300_OPT394.inst: mean_ratio=1.0000 ci95=[1.0000, 1.0000]
+instance_N300_OPT5645.inst: mean_ratio=1.3989 ci95=[1.3981, 1.3996]
+instance_N300_OPT6260.inst: mean_ratio=1.2661 ci95=[1.2657, 1.2664]
+instance_N300_OPT7236.inst: mean_ratio=1.3993 ci95=[1.3991, 1.3996]
+instance_N350_OPT277.inst: mean_ratio=1.0000 ci95=[1.0000, 1.0000]
+instance_N350_OPT5552.inst: mean_ratio=1.5339 ci95=[1.5334, 1.5345]
+instance_N400_OPT3683.inst: mean_ratio=1.6534 ci95=[1.6533, 1.6535]
+instance_N400_OPT3717.inst: mean_ratio=1.5276 ci95=[1.5267, 1.5285]
+instance_N400_OPT377.inst: mean_ratio=1.0000 ci95=[1.0000, 1.0000]
+instance_N400_OPT398.inst: mean_ratio=1.3015 ci95=[1.3015, 1.3015]
 
-overall_mean_ratio: 1.0000
+overall_mean_ratio: 1.2352

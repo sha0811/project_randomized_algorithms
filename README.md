@@ -15,17 +15,25 @@ The **competitive ratio** of an online algorithm is (algorithm cost) / (offline 
 ## Project structure
 
 ```
-Projet/
+project_randomized_algorithms/
 ├── README.md
 ├── utilities.py                            # Instance loading, Manhattan distance, paths (instances, results)
 ├── eval.py                                 # Entry point: run all algorithms on all instances
 ├── algorithms/
+<<<<<<< HEAD
 │   ├── __init__.py                         # Exports (run_* and choose_server_*)
 │   ├── deterministic.py                    # Deterministic algorithms (greedy, balance, double coverage, etc.)
 │   ├── polylogarithmic_randomized.py       # Very big file, polylogarithmic online randomized algorithm
 |   └── randomized.py                       # Randomized algorithms (random among nearest, balance random)
 ├── k-server_instances/                     # .inst files (one instance per file)
 └── results/                                # .txt result files (one per algorithm)
+=======
+│   ├── __init__.py       # Exports (run_* and choose_server_*)
+│   ├── deterministic.py # Deterministic algorithms (greedy, balance, WFA, double coverage, etc.)
+│   └── randomized.py     # Randomized algorithms (harmonic, softmin, random among nearest, etc.)
+├── k-server_instances/   # .inst files (one instance per file)
+└── results/              # .txt result files (one per algorithm)
+>>>>>>> 045bcf41e88f05c6da18d87f5cc895ed28ffc08f
 ```
 
 - Each algorithm exposes a **`run_*(path, **kwargs)`** function that takes an instance path and returns **`(cost, opt)`**. The evaluator only uses this interface.
@@ -42,6 +50,12 @@ From the project root:
 
 ```bash
 python eval.py
+```
+
+To run only specific algorithms:
+
+```bash
+python eval.py greedy balance wfa
 ```
 
 - **Deterministic** algorithms are run once per instance; results are written to `results/<algo_name>.txt` with cost, opt, and ratio per instance, then **mean ratio** and **95% confidence interval** (over instances) at the end of the file.
@@ -80,7 +94,8 @@ Sites are numbered in order of appearance (starting from 0).
 | Softmin balance              | Randomized    | Balance with softmin (temperature-controlled probabilistic selection) |
 | BBMN                         | Randomized    | Fractional algorithm based on HST embedding (eps, deta parameters) |
 
-Parameters (α, β, m, etc.) are set in the calls to `test_algo_all_instances` / `test_randomized_algo_all_instances` in `eval.py`.
+
+Parameters (α, β, m, temperature, etc.) are set in `eval.py` in the `ALGORITHMS` mapping.
 
 ## Results
 
