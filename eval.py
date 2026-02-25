@@ -1,16 +1,25 @@
 import math
 from tqdm import tqdm
-
+import sys
 from utilities import instances_dir, results_dir
 from algorithms import (
     run_greedy,
     run_balance,
     run_balance_aggressive,
     run_balance_exponential,
+    run_balance_sqrt,
+    run_balance_time_decay,
+    run_balance_time_decay_inverse,
+    run_balance_reuse_zero,
+    run_site_affinity,
     run_double_coverage,
+    run_wfa,
+    run_adaptive_clustering,
     run_random_among_nearest,
     run_balance_random,
     run_bbmn_fractional,
+    run_harmonic,
+    run_softmin_balance,
 )
 
 
@@ -62,6 +71,27 @@ def test_randomized_algo_all_instances(algorithm, algo_name, n_runs=10_000, **al
             out.write(f"\noverall_mean_ratio: {overall_mean:.4f}\n")
 
 
+# Mapping algo name to its properties
+ALGORITHMS = {
+    "greedy": (run_greedy, True, {}),
+    "balance": (run_balance, True, {"alpha": 0.5}),
+    "balance_aggressive": (run_balance_aggressive, True, {"alpha": 0.01}),
+    "balance_exponential": (run_balance_exponential, True, {"alpha": 0.5, "beta": 0.01}),
+    "balance_sqrt": (run_balance_sqrt, True, {"alpha": 0.5}),
+    "balance_time_decay": (run_balance_time_decay, True, {"alpha_0": 0.55, "decay": 0.9988}),
+    "balance_time_decay_inverse": (run_balance_time_decay_inverse, True, {"alpha_0": 0.6, "T": 8000}),
+    "balance_reuse_zero": (run_balance_reuse_zero, True, {"alpha_0": 0.55, "decay": 0.999}),
+    "site_affinity": (run_site_affinity, True, {"alpha": 0.5, "max_ratio": 1.4}),
+    "double_coverage": (run_double_coverage, True, {}),
+    "wfa": (run_wfa, True, {}),
+    "adaptive_clustering": (run_adaptive_clustering, True, {"window": 20, "reassign_every": 10}),
+    "random_among_nearest": (run_random_among_nearest, False, {"m": 2}),
+    "balance_random": (run_balance_random, False, {"alpha": 0.5}),
+    "harmonic": (run_harmonic, False, {}),
+    "softmin_balance": (run_softmin_balance, False, {"alpha": 0.5, "temperature": 10.0}),
+}
+
+
 if __name__ == "__main__":
     # Deterministic algorithms
     # test_algo_all_instances(run_greedy, algo_name="greedy")
@@ -83,3 +113,26 @@ if __name__ == "__main__":
         # hst_seed is intentionally omitted so each run gets a fresh random HST
         eps=0.05, deta=0.05
     )
+# =======
+#     if len(sys.argv) > 1:
+#         # case where we want to run a specific algorithm
+#         for name in sys.argv[1:]:
+#             name = name.strip().lower()
+#             if name not in ALGORITHMS:
+#                 print(f"Unknown algorithm: {name}. Available: {', '.join(sorted(ALGORITHMS))}")
+#                 sys.exit(1)
+#             algo, deterministic, kwargs = ALGORITHMS[name]
+#             if deterministic:
+#                 test_algo_all_instances(algo, algo_name=name, **kwargs)
+#             else:
+#                 test_randomized_algo_all_instances(algo, algo_name=name, **kwargs)
+#             print(f"Done: {name} -> results/{name}.txt")
+#     else:
+#         # Run all algorithms
+#         for name, (algo, deterministic, kwargs) in ALGORITHMS.items():
+#             if deterministic:
+#                 test_algo_all_instances(algo, algo_name=name, **kwargs)
+#             else:
+#                 test_randomized_algo_all_instances(algo, algo_name=name, **kwargs)
+#             print(f"Done: {name}")
+# >>>>>>> 976cd1b763d5fac28d31d963761055692d0a8395

@@ -63,6 +63,8 @@ Sites are numbered in order of appearance (starting from 0).
 |--------------------|-------------|-------------------|
 | Greedy             | Deterministic | Nearest server |
 | Balance            | Deterministic | Minimise distance + α × (distance already travelled by server) |
+| Balance time decay | Deterministic | Balance with time-decaying α (decay=0.9988) |
+| Balance reuse zero  | Deterministic | Like balance time decay but when a server is already at the request, prefer the one that last served this site (best mean ratio) |
 | Balance aggressive | Deterministic | Balance with quadratic penalty on load |
 | Balance exponential| Deterministic | Balance with exponential penalty on load |
 | Double Coverage    | Deterministic | Two nearest servers move toward the request until one reaches it |
