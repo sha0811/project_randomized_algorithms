@@ -1,3 +1,4 @@
+import math
 import random
 from utilities import load_instance, manhattan
 
@@ -126,3 +127,60 @@ def choose_server_harmonic(servers, site_pos, state, **kwargs):
             return j
 
     return k - 1  # fallback (floating-point edge case)
+
+
+
+
+def run_softmin_balance(path, alpha=0.5, temperature=10.0, **kwargs):
+    """
+    Randomized balance: choose server with probability proportional to exp(-score / temp).
+    Score = distance + alpha * total_dist. Temperature allows to control exploration vs exploitation.
+    """
+    instance = load_instance(path)
+    clients = instance["sites"]
+    requests = instance["requests"]
+    k = instance["k"]
+    servers = [(0, 0)] * k
+    state = {}
+    cost = 0
+    for request in requests:
+        site_pos = clients[request]
+        server = choose_server_softmin_balance(
+            servers, site_pos, state, alpha=alpha, temperature=temperature, **kwargs
+        )
+        cost += manhattan(servers[server], site_pos)
+        servers[server] = site_pos
+    return (cost, instance["opt"])
+
+
+def choose_server_softmin_balance(servers, site_pos, state, alpha=0.5, temperature=10.0, **kwargs):
+    """
+    Softmin over balance scores: P(j) ∝ exp(-score_j / temperature).
+    """
+    if "rng" not in state:
+        state["rng"] = random.Random()
+    if "total_dist" not in state:
+        state["total_dist"] = [0] * len(servers)
+    rng = state["rng"]
+    k = len(servers)
+    scores = [
+        manhattan(servers[j], site_pos) + alpha * state["total_dist"][j]
+        for j in range(k)
+    ]
+    # Softmin: weights = exp(-score / T), then normalize
+    min_s = min(scores)
+    weights = [math.exp(-(s - min_s) / temperature) for s in scores]
+    total = sum(weights)
+    r = rng.random() * total
+    cumulative = 0.0
+    #servers with a higher score are more likely to be chosen
+    for j, w in enumerate(weights):
+        cumulative += w
+        if r <= cumulative:
+            best_server = j
+            break
+    else:
+        best_server = k - 1
+    d = manhattan(servers[best_server], site_pos)
+    state["total_dist"][best_server] += d
+    return best_server

@@ -151,6 +151,242 @@ def choose_server_balance_exponential(servers, site_pos, state, alpha=0.5, beta=
     return best_server
 
 
+def run_balance_sqrt(path, alpha=0.5, **kwargs):
+    """Other try: Balance with sublinear (sqrt) penalty on total distance"""
+    instance = load_instance(path)
+    clients = instance["sites"]
+    requests = instance["requests"]
+    k = instance["k"]
+    servers = [(0, 0)] * k
+    state = {}
+    cost = 0
+    for request in requests:
+        site_pos = clients[request]
+        server = choose_server_balance_sqrt(servers, site_pos, state, alpha=alpha, **kwargs)
+        cost += manhattan(servers[server], site_pos)
+        servers[server] = site_pos
+    return (cost, instance["opt"])
+
+
+def choose_server_balance_sqrt(servers, site_pos, state, alpha=0.5, **kwargs):
+    """Like Balance but penalty is alpha * sqrt(total_dist[j])."""
+    if "total_dist" not in state:
+        state["total_dist"] = [0] * len(servers)
+    best_server = 0
+    best_score = manhattan(servers[0], site_pos) + alpha * math.sqrt(state["total_dist"][0])
+    for j in range(1, len(servers)):
+        score = manhattan(servers[j], site_pos) + alpha * math.sqrt(state["total_dist"][j])
+        if score < best_score:
+            best_score = score
+            best_server = j
+    d = manhattan(servers[best_server], site_pos)
+    state["total_dist"][best_server] += d
+    return best_server
+
+
+def run_balance_time_decay(path, alpha_0=0.8, decay=0.99995, **kwargs):
+    """Decreasing penalty on already travelled distance over time: alpha_t = alpha_0 * decay^t."""
+    instance = load_instance(path)
+    clients = instance["sites"]
+    requests = instance["requests"]
+    k = instance["k"]
+    servers = [(0, 0)] * k
+    state = {}
+    cost = 0
+    for request in requests:
+        site_pos = clients[request]
+        server = choose_server_balance_time_decay(
+            servers, site_pos, state, alpha_0=alpha_0, decay=decay, **kwargs
+        )
+        cost += manhattan(servers[server], site_pos)
+        servers[server] = site_pos
+    return (cost, instance["opt"])
+
+
+def choose_server_balance_time_decay(servers, site_pos, state, alpha_0=0.8, decay=0.99995, **kwargs):
+    """
+    Balance with alpha that decays over time: alpha_t = alpha_0 * decay^t.
+    Early requests favour load balancing and later requests favour nearest server.
+    """
+    if "total_dist" not in state:
+        state["total_dist"] = [0] * len(servers)
+    if "t" not in state:
+        state["t"] = 0
+    t = state["t"]
+    state["t"] += 1
+    alpha = alpha_0 * (decay ** t)
+    best_server = 0
+    best_score = manhattan(servers[0], site_pos) + alpha * state["total_dist"][0]
+    for j in range(1, len(servers)):
+        score = manhattan(servers[j], site_pos) + alpha * state["total_dist"][j]
+        if score < best_score:
+            best_score = score
+            best_server = j
+    d = manhattan(servers[best_server], site_pos)
+    state["total_dist"][best_server] += d
+    return best_server
+
+
+def run_balance_time_decay_inverse(path, alpha_0=0.6, T=8000, **kwargs):
+    """
+    Balance with inverse time decay: alpha_t = alpha_0 / (1 + t/T).
+    It has a smoother decay than exponential.
+    """
+    instance = load_instance(path)
+    clients = instance["sites"]
+    requests = instance["requests"]
+    k = instance["k"]
+    servers = [(0, 0)] * k
+    state = {}
+    cost = 0
+    for request in requests:
+        site_pos = clients[request]
+        server = choose_server_balance_time_decay_inverse(
+            servers, site_pos, state, alpha_0=alpha_0, T=T, **kwargs
+        )
+        cost += manhattan(servers[server], site_pos)
+        servers[server] = site_pos
+    return (cost, instance["opt"])
+
+
+def choose_server_balance_time_decay_inverse(servers, site_pos, state, alpha_0=0.6, T=8000, **kwargs):
+    if "total_dist" not in state:
+        state["total_dist"] = [0] * len(servers)
+    if "t" not in state:
+        state["t"] = 0
+    t = state["t"]
+    state["t"] += 1
+    alpha = alpha_0 / (1.0 + t / T)
+    best_server = 0
+    best_score = manhattan(servers[0], site_pos) + alpha * state["total_dist"][0]
+    for j in range(1, len(servers)):
+        score = manhattan(servers[j], site_pos) + alpha * state["total_dist"][j]
+        if score < best_score:
+            best_score = score
+            best_server = j
+    d = manhattan(servers[best_server], site_pos)
+    state["total_dist"][best_server] += d
+    return best_server
+
+
+# ── Balance time decay + reuse only when cost 0  ─────────────
+
+
+def run_balance_reuse_zero(path, alpha_0=0.55, decay=0.999, **kwargs):
+    """
+    Balance with time-decaying alpha. If a server is already at the request (cost 0),
+    prefers the one that last served this site to stabilize assignment. Otherwise same as balance_time_decay.
+    """
+    instance = load_instance(path)
+    clients = instance["sites"]
+    requests = instance["requests"]
+    k = instance["k"]
+    servers = [(0, 0)] * k
+    state = {}
+    cost = 0
+    for site_idx in requests:
+        site_pos = clients[site_idx]
+        server = choose_server_balance_reuse_zero(
+            servers, site_pos, site_idx, state, alpha_0=alpha_0, decay=decay, **kwargs
+        )
+        cost += manhattan(servers[server], site_pos)
+        servers[server] = site_pos
+    return (cost, instance["opt"])
+
+
+def choose_server_balance_reuse_zero(servers, site_pos, site_idx, state, alpha_0=0.55, decay=0.999, **kwargs):
+    if "total_dist" not in state:
+        state["total_dist"] = [0] * len(servers)
+    if "last_server_for_site" not in state:
+        state["last_server_for_site"] = {}
+    if "t" not in state:
+        state["t"] = 0
+    t = state["t"]
+    state["t"] += 1
+    k = len(servers)
+    dists = [manhattan(servers[j], site_pos) for j in range(k)]
+    min_d = min(dists)
+    if min_d == 0:
+        last = state["last_server_for_site"].get(site_idx)
+        if last is not None and dists[last] == 0:
+            state["last_server_for_site"][site_idx] = last
+            return last
+        for j in range(k):
+            if dists[j] == 0:
+                state["last_server_for_site"][site_idx] = j
+                return j
+    alpha = alpha_0 * (decay ** t)
+    best_server = 0
+    best_score = dists[0] + alpha * state["total_dist"][0]
+    for j in range(1, k):
+        score = dists[j] + alpha * state["total_dist"][j]
+        if score < best_score:
+            best_score = score
+            best_server = j
+    state["total_dist"][best_server] += dists[best_server]
+    state["last_server_for_site"][site_idx] = best_server
+    return best_server
+
+
+# ── Site affinity: prefer reusing the server that last served this site ─────────
+
+
+def run_site_affinity(path, alpha=0.5, max_ratio=1.4, **kwargs):
+    """
+    When the same site is requested again, prefer the server that last served it
+    if that server is within max_ratio * (min distance); else use balance.
+    """
+    instance = load_instance(path)
+    clients = instance["sites"]
+    requests = instance["requests"]
+    k = instance["k"]
+    servers = [(0, 0)] * k
+    state = {}
+    cost = 0
+    for site_idx in requests:
+        site_pos = clients[site_idx]
+        server = choose_server_site_affinity(
+            servers, site_pos, site_idx, state, alpha=alpha, max_ratio=max_ratio, **kwargs
+        )
+        cost += manhattan(servers[server], site_pos)
+        servers[server] = site_pos
+    return (cost, instance["opt"])
+
+
+def choose_server_site_affinity(servers, site_pos, site_idx, state, alpha=0.5, max_ratio=1.4, **kwargs):
+    """Reuse the server that last served this site when already at site (cost 0) or within max_ratio * min_dist."""
+    if "total_dist" not in state:
+        state["total_dist"] = [0] * len(servers)
+    if "last_server_for_site" not in state:
+        state["last_server_for_site"] = {}
+    k = len(servers)
+    dists = [manhattan(servers[j], site_pos) for j in range(k)]
+    min_dist = min(dists)
+    if min_dist == 0:
+        last = state["last_server_for_site"].get(site_idx)
+        if last is not None and dists[last] == 0:
+            state["last_server_for_site"][site_idx] = last
+            return last
+        for j in range(k):
+            if dists[j] == 0:
+                state["last_server_for_site"][site_idx] = j
+                return j
+    last = state["last_server_for_site"].get(site_idx)
+    if last is not None and dists[last] <= max_ratio * min_dist:
+        state["total_dist"][last] += dists[last]
+        state["last_server_for_site"][site_idx] = last
+        return last
+    best_server = 0
+    best_score = dists[0] + alpha * state["total_dist"][0]
+    for j in range(1, k):
+        score = dists[j] + alpha * state["total_dist"][j]
+        if score < best_score:
+            best_score = score
+            best_server = j
+    state["total_dist"][best_server] += dists[best_server]
+    state["last_server_for_site"][site_idx] = best_server
+    return best_server
+
 
 def run_double_coverage(path, **kwargs):
     instance = load_instance(path)
